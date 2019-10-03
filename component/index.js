@@ -21,13 +21,15 @@ class Index extends React.Component {
     this.state={
       OpacityImage: new Animated.Value(0),
       OpacityText: new Animated.Value(0),
-      ImagePosition: new Animated.Value(0),
+      ImagePositionY: new Animated.Value(0),
       ImageScale: new Animated.Value(1),
+      ProfPicDisabledClick: true,
+      ImagePositionX: new Animated.Value(0),
     }
   }
 
   AnimationView = () => {
-    Animated.sequence([
+    Animated.parallel([
       Animated.timing(this.state.OpacityText,{
         toValue:1,
         duration:2000,
@@ -36,23 +38,27 @@ class Index extends React.Component {
         toValue:1,
         duration:2000,
       })
-    ]).start();
+    ]).start(() => this.setState({ProfPicDisabledClick:false}));
   }
 
   ProfilePicClicked = () => {
     Animated.parallel([
       Animated.timing(this.state.ImageScale,{
-        toValue:0.5,
-        duration:500
+        toValue:0.4,
+        duration:1000
       }),
-      Animated.timing(this.state.ImagePosition,{
-        toValue:-height/1.5,
-        duration:500
+      Animated.timing(this.state.ImagePositionY,{
+        toValue:-height,
+        duration:1000
       }),
       Animated.timing(this.state.OpacityText,{
         toValue:0,
-        duration:500,
+        duration:1000,
       }),
+      Animated.timing(this.state.ImagePositionX,{
+        toValue:-width/1.2,
+        duration:1000
+      })
     ]).start()
   }
 
@@ -65,22 +71,24 @@ class Index extends React.Component {
       <Container>
         <View style={styles.Container}>
 
-          <Animated.View style={{flex:1, opacity:this.state.OpacityText}}>
-
-            <View style={{flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'red'}}>
-              <Text style={{fontFamily:'chrolinr', fontSize:50}}>WELCOME</Text>
+          <Animated.View style={{flex:1, opacity:this.state.OpacityText, alignItems:'center'}}>
+            <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+              <Text style={{fontFamily:'chrolinr', fontSize:60}}> WELCOME </Text>
             </View>
-
           </Animated.View>
           
-          <Animated.View style={{flex:2, opacity:this.state.OpacityImage, backgroundColor:'blue', alignItems:'center'}}>
-            <Animated.View style={{transform:[{scale:this.state.ImageScale},{translateY:this.state.ImagePosition}], alignItems:'center'}}>
-              <TouchableOpacity onPress={()=>this.ProfilePicClicked()}>
+          <View style={{flex:2, alignItems:'center'}}>
+            <Animated.View style={{opacity:this.state.OpacityImage, transform:[{scale:this.state.ImageScale},{translateY:this.state.ImagePositionY}, {translateX:this.state.ImagePositionX}], alignItems:'center'}}>
+              <TouchableOpacity onPress={()=>this.ProfilePicClicked()} disabled={this.state.ProfPicDisabledClick}>
                 <Image source={require('./src/Oke.jpg')} style={styles.Image} />
               </TouchableOpacity> 
             </Animated.View>
-          </Animated.View>
+          </View>
 
+        </View>
+        
+        <View style={{flex:1}}>
+          <Text>hello wotld</Text>
         </View>
       </Container>
     );
@@ -89,11 +97,11 @@ class Index extends React.Component {
 
 const styles = StyleSheet.create({
   Container:{
-    flex:1,
+    flex:0,
     justifyContent:'center',
     alignItems:'center',
     height:height,
-    width:width
+    width:width,
   },
   Image:{
     borderRadius:height,
