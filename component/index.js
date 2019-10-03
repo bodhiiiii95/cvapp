@@ -11,13 +11,16 @@ import { SafeAreaView, StyleSheet, ScrollView, View, StatusBar, } from 'react-na
 
 import {Text, Container, Content, Thumbnail} from 'native-base';
 
-const Index: () => React$Node = () => {
-  return (
-    <Container>
-      <Content>
-        <Thumbnail large source={require('./src/Oke.jpg')} />
-      </Content>
-    </Container>
-  );
-};
+class Index extends React.Component {
+  render(){
+    return(
+      <Container>
+        <Content>
+          <Thumbnail large source={require('./src/Oke.jpg')} />
+        </Content>
+      </Container>
+    );
+  }
+  
+}
 export default Index;
