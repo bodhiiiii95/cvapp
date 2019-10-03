@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { SafeAreaView, StyleSheet, ScrollView, View, StatusBar, Image, Dimensions, Animated, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, ScrollView, View, StatusBar, ImageBackground, Image, Dimensions, Animated, TouchableOpacity } from 'react-native';
 
 import {Text, Container, Content, Thumbnail} from 'native-base';
 
@@ -69,11 +69,11 @@ class Index extends React.Component {
   render(){
     return(
       <Container>
-        <View style={styles.Container}>
+        <ImageBackground blurRadius={1} source={require('./src/background.jpg')} style={styles.Container}>
 
           <Animated.View style={{flex:1, opacity:this.state.OpacityText, alignItems:'center'}}>
             <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-              <Text style={{fontFamily:'chrolinr', fontSize:60}}> WELCOME </Text>
+              <Text style={{fontFamily:'chrolinr', fontSize:60, color:'white'}}> WELCOME </Text>
             </View>
           </Animated.View>
           
@@ -85,11 +85,7 @@ class Index extends React.Component {
             </Animated.View>
           </View>
 
-        </View>
-        
-        <View style={{flex:1}}>
-          <Text>hello wotld</Text>
-        </View>
+        </ImageBackground>
       </Container>
     );
   }
@@ -97,7 +93,7 @@ class Index extends React.Component {
 
 const styles = StyleSheet.create({
   Container:{
-    flex:0,
+    flex:1,
     justifyContent:'center',
     alignItems:'center',
     height:height,
