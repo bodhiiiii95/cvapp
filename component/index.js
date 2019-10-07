@@ -45,6 +45,8 @@ class Index extends React.Component {
       SkillModalXPos : new Animated.Value(SkillModalXPos),
       ExpScaleModal : new Animated.Value(0),
       SkillTextOpacity : new Animated.Value(0),
+      ReactNativeFull : 0,
+      ReactNativeSkill : new Animated.Value(0),
     }
   }
 
@@ -200,8 +202,16 @@ class Index extends React.Component {
       Animated.timing(this.state.SkillTextOpacity,{
         toValue:1,
         duration:750
+      }),
+      Animated.timing(this.state.ReactNativeSkill,{
+        toValue:75,
+        duration:750
       })
     ]).start();
+  }
+
+  SkillBarStatus = () => {
+    
   }
 
   ExpModalShowAnimated = () => {
@@ -216,6 +226,12 @@ class Index extends React.Component {
   }
 
   render(){
+    const ReactNativePercentage = this.state.ReactNativeSkill.interpolate({
+      inputRange:[0, 100],
+      outputRange:[0, this.state.ReactNativeFull],
+      extrapolate:'clamp',
+    })
+
     return(
       <Container>
         <StatusBar hidden />
@@ -340,25 +356,25 @@ class Index extends React.Component {
               </TouchableWithoutFeedback>
               <Animated.View style={{position:'absolute', width:this.state.SkillModalWidth, height:this.state.SkillModalHeight, backgroundColor:'white', left:(width-(width-20))/2, top:height/4, borderRadius:20, transform:[{translateY:this.state.SkillModalYPos},{translateX:this.state.SkillModalXPos}] }}>
                 <Animated.View style={{alignItems:'center', flexDirection:'row', margin:10, opacity:this.state.SkillTextOpacity}}>
-                  
                   <View style={{flex:2}}>
                     <Text>React Native :</Text>
                   </View>
-                  <View style={{flex:3, height:10, width:200, backgroundColor:'black', borderRadius:100}}>
-                    
-                  </View>
+                  <View onLayout={(event) => {this.setState({ReactNativeFull:event.nativeEvent.layout.width})}} style={{flex:3, height:10, backgroundColor:'black', borderRadius:10}}>
+                    <Animated.View style={{height:10, width:ReactNativePercentage, backgroundColor:'aqua'}}>
 
+                    </Animated.View>
+                  </View>
                 </Animated.View>
+
                 <Animated.View style={{alignItems:'center', flexDirection:'row', margin:10, opacity:this.state.SkillTextOpacity}}>
-                  
                   <View style={{flex:2}}>
                     <Text>PHP :</Text>
                   </View>
                   <View style={{flex:3, height:10, width:200, backgroundColor:'black', borderRadius:100}}>
                     
                   </View>
-
                 </Animated.View>
+
               </Animated.View>
             </Modal>
           {/* Skill Modal */}
