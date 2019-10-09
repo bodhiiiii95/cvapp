@@ -7,7 +7,9 @@
  */
 
 import React from 'react';
-import { SafeAreaView, Modal, StyleSheet, ScrollView, View, StatusBar, ImageBackground, Image, Dimensions, Animated, TouchableOpacity, TouchableHighlight, TouchableWithoutFeedback ,Button } from 'react-native';
+import { SafeAreaView, Modal, StyleSheet, ScrollView, PanResponder ,View, StatusBar, 
+  Image, Dimensions, Animated, TouchableOpacity, TouchableHighlight, 
+  TouchableWithoutFeedback ,Button, Linking} from 'react-native';
 
 import {Text, Container, Content, Thumbnail} from 'native-base';
 
@@ -15,6 +17,9 @@ const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 const SkillModalXPos = width/2 -((width-(width-20)));
 const SkillModalYPos = height/4;
+const CreditBoxMargin = height/30;
+const ContactBoxMargin = height/60;
+let FirstPanMoveY, SecondPanMoveY;
 
 class Index extends React.Component {
 
@@ -45,8 +50,16 @@ class Index extends React.Component {
       SkillModalXPos : new Animated.Value(SkillModalXPos),
       ExpScaleModal : new Animated.Value(0),
       SkillTextOpacity : new Animated.Value(0),
-      ReactNativeFull : 0,
+      BarFull : 0,
       ReactNativeSkill : new Animated.Value(0),
+      PHPSkill : new Animated.Value(0),
+      PythonSkill : new Animated.Value(0),
+      LinuxSkill : new Animated.Value(0),
+      SlidingPanOpacity : new Animated.Value(0),
+      BoxPositionY : new Animated.ValueXY({x:0,y:height/1.2}),
+      MenuClickDisabled : true,
+      SlidingEnabled : false,
+      SlidingPanOpenStatus : false,
     }
   }
 
@@ -109,14 +122,36 @@ class Index extends React.Component {
       Animated.timing(this.state.CardOneOpacity,{
         toValue:1,
         duration:250
+      }),
+      Animated.timing(this.state.SlidingPanOpacity,{
+        toValue:1,
+        duration:250
       })
-    ]).start()
+    ]).start(() => {this.setState({MenuClickDisabled:false, SlidingEnabled:true})})
   }
 
   ModalDismiss = (e) => {
     this.setState({ModalBGClickDisable:true}, ()=>{
       if(e === 'skill'){
         Animated.sequence([
+          Animated.parallel([
+            Animated.timing(this.state.ReactNativeSkill,{
+              toValue:0,
+              duration:750
+            }),
+            Animated.timing(this.state.PHPSkill,{
+              toValue:0,
+              duration:750
+            }),
+            Animated.timing(this.state.PythonSkill,{
+              toValue:0,
+              duration:750,
+            }),
+            Animated.timing(this.state.LinuxSkill,{
+              toValue:0,
+              duration:750,
+            })
+          ]),
           Animated.timing(this.state.SkillTextOpacity,{
             toValue:0,
             duration:750
@@ -158,23 +193,22 @@ class Index extends React.Component {
   }
 
   MenuImageClicked = (e) => {
-    this.setState({ModalBGClickDisable:false}, ()=>{
-      if(e === 'skill'){
-        this.setState({
-          SkillModalShow:true
-        })
-      }
-      else if(e === 'edu'){
-        this.setState({
-          EducationModalShow:true
-        })
-      }
-      else if(e === 'exp'){
-        this.setState({
-          ExpModalShow:true
-        })
-      }
-    })
+    if(e === 'skill'){
+      this.setState({
+        SkillModalShow:true
+      })
+    }
+    else if(e === 'edu'){
+      this.setState({
+        EducationModalShow:true,
+        ModalBGClickDisable:false
+      })
+    }
+    else if(e === 'exp'){
+      this.setState({
+        ExpModalShow:true
+      })
+    }
   }
 
   SkillModalShowAnimated = () => {
@@ -203,22 +237,40 @@ class Index extends React.Component {
         toValue:1,
         duration:750
       }),
-      Animated.timing(this.state.ReactNativeSkill,{
-        toValue:75,
-        duration:750
-      })
-    ]).start();
-  }
-
-  SkillBarStatus = () => {
-    
+      Animated.parallel([
+        Animated.timing(this.state.ReactNativeSkill,{
+          toValue:75,
+          duration:750
+        }),
+        Animated.timing(this.state.PHPSkill,{
+          toValue:55,
+          duration:750,
+        }),
+        Animated.timing(this.state.PythonSkill,{
+          toValue:50,
+          duration:750,
+        }),
+        Animated.timing(this.state.LinuxSkill,{
+          toValue:45,
+          duration:750,
+        })
+      ])
+    ]).start(() => {this.setState({ModalBGClickDisable:false})});
   }
 
   ExpModalShowAnimated = () => {
     Animated.timing(this.state.ExpScaleModal,{
       toValue:1,
       duration:500
-    }).start()
+    }).start(() => {this.setState({ModalBGClickDisable:false})})
+  }
+
+  InstagramClicked = () => {
+    Linking.openURL('instagram://user?username=bodhiiiii95');
+  }
+
+  LinkedinClicked = () => {
+    Linking.openURL('linkedin://profile/in/bodhi-jaya-231bba136')
   }
 
   componentDidMount(){
@@ -226,10 +278,140 @@ class Index extends React.Component {
   }
 
   render(){
-    const ReactNativePercentage = this.state.ReactNativeSkill.interpolate({
+    let ReactNativePercentage = this.state.ReactNativeSkill.interpolate({
       inputRange:[0, 100],
-      outputRange:[0, this.state.ReactNativeFull],
+      outputRange:[0, this.state.BarFull],
       extrapolate:'clamp',
+    })
+
+    let PHPPercentage = this.state.PHPSkill.interpolate({
+      inputRange:[0,100],
+      outputRange:[0, this.state.BarFull],
+      extrapolate:'clamp'
+    })
+
+    let PythonPercentage = this.state.PythonSkill.interpolate({
+      inputRange:[0,100],
+      outputRange:[0, this.state.BarFull],
+      extrapolate:'clamp'
+    })
+
+    let LinuxPercentage = this.state.LinuxSkill.interpolate({
+      inputRange:[0,100],
+      outputRange:[0, this.state.BarFull],
+      extrapolate:'clamp'
+    })
+
+    let YPOS = this.state.BoxPositionY.y.interpolate({
+      inputRange:[0,100],
+      outputRange:[98,533],
+      extrapolate:'clamp'
+    })
+
+    const SlidingMenu = PanResponder.create({
+      onStartShouldSetPanResponder : (e, GestureState) => true,
+      onStartShouldSetPanResponderCapture : (e, GestureState) => {
+        return !(GestureState.dx === 0 && GestureState.dy === 0)
+      },
+      onMoveShouldSetPanResponder : (e, GestureState) => true,
+      onMoveShouldSetPanResponderCapture : (e, GestureState) => true,
+
+      onPanResponderGrant : (e,GestureState) =>{
+        if(this.state.SlidingEnabled === false){
+
+        }
+        else{
+          this.state.BoxPositionY.setOffset({y:this.state.BoxPositionY.y._value})
+          this.state.BoxPositionY.setValue({y:0})
+          FirstPanMoveY=GestureState.y0;
+        }
+      },
+      onPanResponderMove : (e, GestureState) => {
+        if(this.state.SlidingEnabled === false){
+
+        }
+        else{
+          //this.state.BoxPositionY.y.setValue(GestureState.dy);
+          //console.log(this.state.BoxPositionY.y._value)
+
+          
+          if(this.state.BoxPositionY.y._value > 0 && this.state.SlidingPanOpenStatus === false){
+            ;
+          }
+          else if(this.state.BoxPositionY.y._value < 0 && this.state.SlidingPanOpenStatus === true){
+            ;
+          }
+          else if(this.state.BoxPositionY.y._value >= -431 && this.state.SlidingPanOpenStatus === false){
+            Animated.event([
+              null,
+              {dy:this.state.BoxPositionY.y}
+            ])(e, GestureState)
+          }
+          else if(this.state.BoxPositionY.y._value >= 0 && this.state.SlidingPanOpenStatus === true){
+            Animated.event([
+              null,
+              {dy:this.state.BoxPositionY.y}
+            ])(e, GestureState)
+          }
+          else{
+            ;
+          }
+          
+          /*this.state.BoxPositionY.y._value >= -200 && this.state.SlidingPanOpenStatus === false ?
+          Animated.event([
+            null,
+            {dy:this.state.BoxPositionY.y}
+          ])(e, GestureState)
+          :
+          console.log(this.state.BoxPositionY.y._value)*/
+        }
+      },
+      onPanResponderTerminationRequest : (e, GestureState) => true,
+      onPanResponderRelease : (e, GestureState) => {
+        this.state.BoxPositionY.flattenOffset();
+        SecondPanMoveY = GestureState.moveY
+        let DeltaPanMoveY = SecondPanMoveY - FirstPanMoveY;
+
+        if(Math.abs(DeltaPanMoveY) > 60 && this.state.SlidingPanOpenStatus === true){
+          if(this.state.BoxPositionY.y._value < 99){
+            Animated.timing(this.state.BoxPositionY.y,{
+              toValue:98,
+              duration:100
+            }).start()
+          }
+          else{
+            this.setState({SlidingPanOpenStatus:false}, () => {
+              Animated.timing(this.state.BoxPositionY.y,{
+                toValue:533,
+                duration:500
+              }).start()
+            })
+          }
+        }
+        else if(Math.abs(DeltaPanMoveY) > 60 && this.state.SlidingPanOpenStatus === false){
+          this.setState({SlidingPanOpenStatus:true}, () => {
+            Animated.timing(this.state.BoxPositionY.y,{
+              toValue:98,
+              duration:500
+            }).start()
+          })
+        }
+        else if(Math.abs(DeltaPanMoveY) < 60 && this.state.SlidingPanOpenStatus === false){
+          Animated.timing(this.state.BoxPositionY.y,{
+            toValue:533,
+            duration:500
+          }).start()
+        }
+        else if(Math.abs(DeltaPanMoveY) < 60 && this.state.SlidingPanOpenStatus === true){
+          Animated.timing(this.state.BoxPositionY.y,{
+            toValue:98,
+            duration:500
+          }).start()
+        }
+        else{
+
+        }
+      }
     })
 
     return(
@@ -272,7 +454,7 @@ class Index extends React.Component {
                 <View style={{flex:1, flexDirection:'row'}}>
                   {/* Menul */}
                   <View onLayout={(event) => this.GetBorderImageSize(event)} style={{flex:1, backgroundColor:'transparent', alignItems:'center', justifyContent:'center'}}>
-                    <TouchableOpacity onPress={() => this.MenuImageClicked('edu')}>
+                    <TouchableOpacity disabled={this.state.MenuClickDisabled} onPress={() => this.MenuImageClicked('edu')}>
                       <View onLayout={(event) => this.GetMenuImageSize(event)} style={{justifyContent:'center', alignItems:'center', backgroundColor:'transparent', margin:10, width:this.state.ImageBorderHeight-50, height:this.state.ImageBorderHeight-50, borderWidth:4, borderRadius:10, borderColor:'black'}}>
                         <Image style={{margin:25, width:this.state.MenuImageWidth-20, height:this.state.MenuImageHeight-20}} source={require('./src/MenuLogo/edu.png')}/>
                       </View>
@@ -281,7 +463,7 @@ class Index extends React.Component {
                   </View>
 
                   <View onLayout={(event) => this.GetBorderImageSize(event)} style={{flex:1, backgroundColor:'transparent', alignItems:'center', justifyContent:'center'}}>
-                    <TouchableOpacity onPress={() => this.MenuImageClicked('skill')}>
+                    <TouchableOpacity disabled={this.state.MenuClickDisabled} onPress={() => this.MenuImageClicked('skill')}>
                       <View onLayout={(event) => this.GetMenuImageSize(event)} style={{justifyContent:'center', alignItems:'center', backgroundColor:'transparent', margin:10, width:this.state.ImageBorderHeight-50, height:this.state.ImageBorderHeight-50, borderWidth:4, borderRadius:10, borderColor:'black'}}>
                         <Image style={{margin:25, width:this.state.MenuImageWidth-20, height:this.state.MenuImageHeight-20}} source={require('./src/MenuLogo/skill.png')}/>
                       </View>
@@ -290,7 +472,7 @@ class Index extends React.Component {
                   </View>
 
                   <View onLayout={(event) => this.GetBorderImageSize(event)} style={{flex:1, backgroundColor:'transparent', alignItems:'center', justifyContent:'center'}}>
-                    <TouchableOpacity onPress={() => this.MenuImageClicked('exp')}>
+                    <TouchableOpacity disabled={this.state.MenuClickDisabled} onPress={() => this.MenuImageClicked('exp')}>
                       <View onLayout={(event) => this.GetMenuImageSize(event)} style={{justifyContent:'center', alignItems:'center', backgroundColor:'transparent', margin:10, width:this.state.ImageBorderHeight-50, height:this.state.ImageBorderHeight-50, borderWidth:4, borderRadius:10, borderColor:'black'}}>
                         <Image style={{margin:25, width:this.state.MenuImageWidth-20, height:this.state.MenuImageHeight-20}} source={require('./src/MenuLogo/exp.png')}/>
                       </View>
@@ -320,6 +502,7 @@ class Index extends React.Component {
                   <Image source={require('./src/Oke.jpg')} style={styles.Image} />
                 </TouchableHighlight> 
               </Animated.View>
+              
             </View>
             {/* Welcome and photo position*/}
             
@@ -334,13 +517,21 @@ class Index extends React.Component {
                 
                 </View>
               </TouchableWithoutFeedback>
-              <View style={{justifyContent:'center', position:'absolute', width:width-20, height:height/2, backgroundColor:'white', left:(width-(width-20))/2, top:height/4, borderRadius:20}}>
-                <View style={{flex:1, flexDirection:'row', margin:10}}>
+              <View style={{position:'absolute', width:width-20, height:height/2, backgroundColor:'white', left:(width-(width-20))/2, top:height/4, borderRadius:20}}>
+                <View style={{flexDirection:'row', margin:10}}>
                   <View style={{flex:1}}>
                     <Text>1.</Text>
                   </View>
                   <View style={{flex:10}}>
-                    <Text>2013 - 2017 Bachelor degree of Computer Science Universitas Multimedia Nusantara</Text>
+                    <Text>(2013 - 2017) Bachelor degree of Computer Science Universitas Multimedia Nusantara</Text>
+                  </View>
+                </View>
+                <View style={{flexDirection:'row', margin:10}}>
+                  <View style={{flex:1}}>
+                    <Text>2.</Text>
+                  </View>
+                  <View style={{flex:10}}>
+                    <Text>(2010 - 2013) BPK PENABUR BANDAR LAMPUNG High School</Text>
                   </View>
                 </View>
               </View>
@@ -359,8 +550,8 @@ class Index extends React.Component {
                   <View style={{flex:2}}>
                     <Text>React Native :</Text>
                   </View>
-                  <View onLayout={(event) => {this.setState({ReactNativeFull:event.nativeEvent.layout.width})}} style={{flex:3, height:10, backgroundColor:'black', borderRadius:10}}>
-                    <Animated.View style={{height:10, width:ReactNativePercentage, backgroundColor:'aqua'}}>
+                  <View onLayout={(event) => {this.setState({BarFull:event.nativeEvent.layout.width})}} style={{flex:3, height:10, backgroundColor:'grey', borderRadius:10}}>
+                    <Animated.View style={{height:10, width:ReactNativePercentage, backgroundColor:'black', borderRadius:100}}>
 
                     </Animated.View>
                   </View>
@@ -370,8 +561,32 @@ class Index extends React.Component {
                   <View style={{flex:2}}>
                     <Text>PHP :</Text>
                   </View>
-                  <View style={{flex:3, height:10, width:200, backgroundColor:'black', borderRadius:100}}>
-                    
+                  <View style={{flex:3, height:10, backgroundColor:'grey', borderRadius:100}}>
+                    <Animated.View style={{width:PHPPercentage, height:10, backgroundColor:'black', borderRadius:100}}>
+
+                    </Animated.View>
+                  </View>
+                </Animated.View>
+
+                <Animated.View style={{alignItems:'center', flexDirection:'row', margin:10, opacity:this.state.SkillTextOpacity}}>
+                  <View style={{flex:2}}>
+                    <Text>Python :</Text>
+                  </View>
+                  <View style={{flex:3, height:10, backgroundColor:'grey', borderRadius:100}}>
+                    <Animated.View style={{width:PythonPercentage, height:10, backgroundColor:'black', borderRadius:100}}>
+
+                    </Animated.View>
+                  </View>
+                </Animated.View>
+
+                <Animated.View style={{alignItems:'center', flexDirection:'row', margin:10, opacity:this.state.SkillTextOpacity}}>
+                  <View style={{flex:2}}>
+                    <Text>Linux :</Text>
+                  </View>
+                  <View style={{flex:3, height:10, backgroundColor:'grey', borderRadius:100}}>
+                    <Animated.View style={{width:LinuxPercentage, height:10, backgroundColor:'black', borderRadius:100}}>
+
+                    </Animated.View>
                   </View>
                 </Animated.View>
 
@@ -392,7 +607,7 @@ class Index extends React.Component {
                     <Text>1.</Text>
                   </View>
                   <View style={{flex:10}}>
-                    <Text>2018 - now SAP Basis, System Admin, Software Engineer at PT. Charoen Pokphand Indonesia</Text>
+                    <Text>(2018 - now) SAP Basis, System Admin, Software Engineer at PT. Charoen Pokphand Indonesia</Text>
                   </View>
                 </View>
                 <View style={{flexDirection:'row', margin:10}}>
@@ -400,12 +615,48 @@ class Index extends React.Component {
                     <Text>2.</Text>
                   </View>
                   <View style={{flex:10}}>
-                    <Text>Sept 2017 - Dec 2017 Network Engineer at Mastersystem Infotama</Text>
+                    <Text>(Sept 2017 - Dec 2017) Network Engineer at Mastersystem Infotama</Text>
                   </View>
                 </View>
               </Animated.View>
             </Modal>
           {/* Exp Modal */}
+
+          {/* Drag UP View */}
+          <Animated.View {...SlidingMenu.panHandlers} style={{alignItems:'center', position:'absolute', backgroundColor:'white', width:width, height:height/1.2, borderRadius:20, borderRadius:10, elevation:15, opacity:this.state.SlidingPanOpacity, transform:[{translateY:this.state.BoxPositionY.y}] }}>
+            {
+              this.state.SlidingPanOpenStatus ?
+              <Image source={require('./src/SlideView/up.png')} style={{width:width/9, height:width/9, transform:[{rotate:'90deg'}] }} />
+              :
+              <Image source={require('./src/SlideView/up.png')} style={{width:width/9, height:width/9, transform:[{rotate:'270deg'}] }} />
+            }
+            
+            <Text style={{marginTop:height/20, textAlign:'center'}}>Credit design idea thanks to https://www.uplabs.com/users/vikrammali</Text>
+            <Text style={{marginTop:CreditBoxMargin, textAlign:'center'}}>Image & Logo credit, Thanks to search from google</Text>
+            <Text style={{marginTop:CreditBoxMargin, textAlign:'center'}}>This app is free to use and open source, you can clone it from https://github.com/bodhiiiii95/cvapp</Text>
+            <Text style={{marginTop:CreditBoxMargin, textAlign:'center'}}>You can reach me via : </Text>
+            <View style={{width:width-20, elevation:10, backgroundColor:'white', borderRadius:10}} >
+              <View style={{flexDirection:'row', marginTop:CreditBoxMargin}}>
+                <View style={{flex:1, alignItems:'center'}}>
+                  <TouchableWithoutFeedback onPress={() => this.InstagramClicked()} >
+                    <Image source={require('./src/SlideView/ig.png')} style={{width:this.state.MenuImageWidth-20, height:this.state.MenuImageHeight-20}} />
+                  </TouchableWithoutFeedback>
+                  <Text style={{fontSize:11}}>ID : bodhiiiii95</Text>
+                </View>
+
+                <View style={{flex:1, alignItems:'center'}}>
+                  <TouchableWithoutFeedback onPress={() => this.LinkedinClicked()} >
+                    <Image source={require('./src/SlideView/linkedin.png')} style={{width:this.state.MenuImageWidth-20, height:this.state.MenuImageHeight-20}} />
+                  </TouchableWithoutFeedback>
+                  <Text style={{fontSize:11}}>ID : bodhi-jaya-231bba136</Text>
+                </View>
+              </View>
+              <Text style={{marginTop:ContactBoxMargin, textAlign:'center'}}>Mobile Phone : +62 812 9020 1285</Text>
+              <Text style={{marginTop:ContactBoxMargin, textAlign:'center'}}>Whatsapp : +62 812 9020 1285</Text>
+            </View>
+            
+          </Animated.View>
+          {/* Drag Up View */}
 
         </View>
         {/* container */}
